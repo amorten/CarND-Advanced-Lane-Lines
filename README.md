@@ -20,10 +20,10 @@ The Files
 [notebook]: ./advanced_lane_finding_pipeline.py "IPython notebook"
 [lanefind.py]: ./lanefind.py "lanefind.py"
 
-A detailed description of this project is given in the [write-up](writup.md).  
+A detailed description of this project is given in the [write-up](./writup.md).  
 
-As discussed in the [write-up](writeup.md), the code to run this project is found in the IPython notebook [advanced\_lane\_finding\_pipeline.py][notebook], which in turn relies heavily on the module defined in [lanefind.py][].
+As discussed in the [write-up](./writeup.md), the code to run this project is found in the IPython notebook [advanced\_lane\_finding\_pipeline.py][notebook], which in turn relies heavily on the module defined in [lanefind.py][].
 
-The original README provided by Udacity has been renamed [README\_Udacity.md]().
+The original README provided by Udacity has been renamed [README\_Udacity.md](./README\_Udacity.md).
 
 Feel free to skip all the boring stuff described above and instead watch [the video](./lane_lines_n3.mp4) output of my lane-finding pipeline!

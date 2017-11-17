@@ -17,10 +17,10 @@ The goals / steps of this project are the following:
 The Files
 ---
 
-[notebook]: ./advanced_lane_finding_pipeline.py "IPython notebook"
+[notebook]: ./advanced_lane_finding_pipeline.ipynb "IPython notebook"
 [lanefind.py]: ./lanefind.py "lanefind.py"
 
-A detailed description of this project is given in the [write-up](./writup.md).  
+A detailed description of this project is given in the [write-up](./writeup.md).  
 
 As discussed in the [write-up](./writeup.md), the code to run this project is found in the IPython notebook [advanced\_lane\_finding\_pipeline.py][notebook], which in turn relies heavily on the module defined in [lanefind.py][].
 

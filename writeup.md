@@ -26,7 +26,7 @@ The goals / steps of this project are the following:
 [lane_fit]: ./output_images/lane_fit.jpg "Fit Visual"
 [lane_area]: ./output_images/lane_area.jpg "Output"
 [video1]: ./project_video.mp4 "Video"
-[notebook]: ./advanced_lane_finding_pipeline.py "IPython notebook"
+[notebook]: ./advanced_lane_finding_pipeline.ipynb "IPython notebook"
 [lanefind.py]: ./lanefind.py "lanefind.py"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points

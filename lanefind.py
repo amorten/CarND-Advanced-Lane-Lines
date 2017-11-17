@@ -34,7 +34,7 @@ class Lane():
         # summary lane info calculated from the fit curves
         self.left_curverad = None
         self.right_curverad = None
-        self.curveature_ave = None
+        self.curvature_ave = None
         self.lane_offset = None
         self.left_pos_x = None
         self.right_pos_x = None
@@ -359,41 +359,6 @@ def find_lane_lanes_given_previous(binary_warped,prev_lane):
     return (lane,out_img)
 
 
-### Draws the lane on an undistorted image
-def draw_lane_lines(undist,Minv,lane,averaged_lanes=True):
-
-    if (averaged_lanes == True):
-    
-        left_fitx = lane.best_left_fitx
-        right_fitx = lane.best_right_fitx
-        ploty = lane.ploty
-    
-    else: # Don't use averaged lanes. Instead use raw lane fits, even if invalid.
-    
-        left_fitx = lane.left_fitx
-        right_fitx = lane.right_fitx
-        ploty = lane.ploty
-    
-    # Create an image to draw the lines on
-    warp_zero = np.zeros_like(undist[:,:,0]).astype(np.uint8)
-    color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
-    
-    # Recast the x and y points into usable format for cv2.fillPoly()
-    pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
-    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
-    pts = np.hstack((pts_left, pts_right))
-    
-    # Draw the lane onto the warped blank image
-    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
-    
-    # Warp the blank back to original image space using inverse perspective matrix (Minv)
-    newwarp = cv2.warpPerspective(color_warp, Minv, (undist.shape[1], undist.shape[0]))
-    # Combine the result with the original image
-    result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
-
-    return result
-
-
 ### Calculates lane features, such as curvature, position, and width
 def calc_lane_features(lane,img_shape):
 
@@ -430,7 +395,7 @@ def calc_lane_features(lane,img_shape):
     left_pos_x = left_fit_cr[0]*y_eval_cr**2 + left_fit_cr[1]*y_eval_cr + left_fit_cr[2]
     right_pos_x = right_fit_cr[0]*y_eval_cr**2 + right_fit_cr[1]*y_eval_cr + right_fit_cr[2]
     # Calculate center offset
-    lane_offset = (left_pos_x + right_pos_x)/2 - image_center_x
+    lane_offset = image_center_x - (left_pos_x + right_pos_x)/2.
     # Print the above values
     #print('Offset: ',lane_offset,'m')
     #print('Left lane pos: ',left_pos_x,'m')
@@ -442,13 +407,84 @@ def calc_lane_features(lane,img_shape):
 
     lane.left_curverad = left_curverad
     lane.right_curverad = right_curverad
-    lane.curveature_ave = (left_curverad + right_curverad) / 2.0
+    lane.curvature_ave = (left_curverad + right_curverad) / 2.0
     lane.lane_offset = lane_offset
     lane.left_pos_x = left_pos_x
     lane.right_pos_x = right_pos_x
     lane.lane_width = right_pos_x - left_pos_x
 
     return lane
+
+
+### Draws the lane on an undistorted image
+### Also print lane features if feature_fontsize>0
+def draw_lane_lines(undist,Minv,lane,averaged_lanes=True,feature_fontsize=0):
+
+    if (averaged_lanes == True):
+    
+        left_fitx = lane.best_left_fitx
+        right_fitx = lane.best_right_fitx
+        ploty = lane.ploty
+    
+    else: # Don't use averaged lanes. Instead use raw lane fits, even if invalid.
+    
+        left_fitx = lane.left_fitx
+        right_fitx = lane.right_fitx
+        ploty = lane.ploty
+    
+    # Create an image to draw the lines on
+    warp_zero = np.zeros_like(undist[:,:,0]).astype(np.uint8)
+    color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
+
+    # Recast the x and y points into usable format for cv2.fillPoly()
+    pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
+    pts = np.hstack((pts_left, pts_right))
+    
+    # Draw the lane onto the warped blank image
+    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+
+    # I commented out the follow code that draws red and blue
+    # lane lines, because drawing the green area between the
+    # lane lines more precisely indicates the lane line positions.
+    # Draw the left and right lane lines in different colors
+    #cv2.fillPoly(color_warp, np.int_(
+    #    [ np.hstack((pts_left-10, pts_left+10))]), (255,0, 0))
+    #cv2.fillPoly(color_warp, np.int_(
+    #    [ np.hstack((pts_right-10, pts_right+10))]), (0,0,255))
+
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = cv2.warpPerspective(color_warp, Minv, (undist.shape[1], undist.shape[0]))
+    # Combine the result with the original image
+    result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
+
+    # Print lane features if feature_fontsize > 0
+    if feature_fontsize > 0:
+        font = cv2.FONT_HERSHEY_DUPLEX
+        ff = feature_fontsize
+        #fig = plt.figure()
+        #plt.imshow(result)
+        fig_text = "Left Radius of Curvature: {} m".format(
+            int(lane.left_curverad))
+        #plt.text(20,50, fig_text,fontsize=feature_fontsize,color='white')
+        cv2.putText(result,fig_text, (20, 60), font, ff, (255, 255, 255), 2, cv2.LINE_AA)
+        fig_text = "Right Radius of Curvature: {} m".format(
+            int(lane.right_curverad))
+        #plt.text(20,100, fig_text,fontsize=feature_fontsize,color='white')
+        cv2.putText(result,fig_text, (20, 110), font, ff, (255, 255, 255), 2, cv2.LINE_AA)
+        fig_text = "Ave. Radius of Curvature: {} m".format(
+            int((lane.left_curverad
+                 +lane.right_curverad)/2.))
+        #plt.text(20,150, fig_text,fontsize=feature_fontsize,color='white')
+        cv2.putText(result,fig_text, (20, 160), font, ff, (255, 255, 255), 2, cv2.LINE_AA)
+        fig_text = "Car is {:.2f} m to right of lane center.".format(
+            lane.lane_offset)
+        #plt.text(20,200, fig_text,fontsize=feature_fontsize,color='white')
+        cv2.putText(result,fig_text, (20, 210), font, ff, (255, 255, 255), 2, cv2.LINE_AA)
+        
+        
+    return result
+
 
 
 ### Checks whether a lane has valid fit parameters.
